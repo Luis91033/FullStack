@@ -3,7 +3,6 @@ import { Request, Response } from "express";
 import slug from "slug";
 import User from "../models/User";
 import { checkPassword, hashPassword } from "../utils/auth";
-import { validationResult } from "express-validator";
 
 export const createAccount = async (req: Request, res: Response) => {
   const { email, password } = req.body;
