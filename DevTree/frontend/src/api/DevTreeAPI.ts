@@ -2,7 +2,7 @@
 
 import { isAxiosError } from "axios";
 import api from "../config/axios";
-import type { User } from "../types";
+import type { User, UserHandle } from "../types";
 
 export async function getUser() {
   try {
@@ -30,6 +30,29 @@ export async function uploadImage(file: File) {
   formData.append("file", file);
   try {
     const { data } = await api.post("/user/image", formData);
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.message) {
+      throw new Error(error.response?.data.error);
+    }
+  }
+}
+
+export async function getUserByHandle(handle: string) {
+  try {
+    const url = `/${handle}`;
+    const { data } = await api.get<UserHandle>(url);
+    return data;
+  } catch (error) {
+    if (isAxiosError(error) && error.message) {
+      throw new Error(error.response?.data.error);
+    }
+  }
+}
+
+export async function searchByHandle(handle: string) {
+  try {
+    const { data } = await api.post<string>("/search", { handle });
     return data;
   } catch (error) {
     if (isAxiosError(error) && error.message) {

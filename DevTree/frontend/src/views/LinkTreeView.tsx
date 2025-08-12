@@ -47,13 +47,9 @@ const LinkTreeView = () => {
       link.name === e.target.name ? { ...link, url: e.target.value } : link
     );
     setDevTreeLinks(updatedLinks);
-    queryClient.setQueryData(["user"], (prevData: User) => {
-      return {
-        ...prevData,
-        links: JSON.stringify(updatedLinks),
-      };
-    });
   };
+
+  const links: SocialNetwork[] = JSON.parse(user.links);
 
   const handleEnableLink = (socialNetwork: string) => {
     const updatedLinks = devTreeLinks.map((link) => {
@@ -68,10 +64,63 @@ const LinkTreeView = () => {
     });
     setDevTreeLinks(updatedLinks);
 
+    let updatedItems: SocialNetwork[] = [];
+
+    const selectSocialNetwork = updatedLinks.find(
+      (link) => link.name === socialNetwork
+    );
+    if (selectSocialNetwork?.enabled) {
+      const id = links.filter((link) => link.id).length + 1;
+      if (links.some((link) => link.name === socialNetwork)) {
+        updatedItems = links.map((link) => {
+          if (link.name === socialNetwork) {
+            return {
+              ...link,
+              enabled: true,
+              id,
+            };
+          } else {
+            return link;
+          }
+        });
+      } else {
+        const newItem = {
+          ...selectSocialNetwork,
+          id,
+        };
+        updatedItems = [...links, newItem];
+      }
+    } else {
+      const indexToUpdate = links.findIndex(
+        (link) => link.name === socialNetwork
+      );
+      updatedItems = links.map((link) => {
+        if (link.name === socialNetwork) {
+          return {
+            ...link,
+            id: 0,
+            enabled: false,
+          };
+        } else if (
+          link.id > indexToUpdate &&
+          indexToUpdate !== 0 &&
+          link.id === 1
+        ) {
+          return {
+            ...link,
+            id: link.id - 1,
+          };
+        } else {
+          return link;
+        }
+      });
+    }
+
+    //Save on database
     queryClient.setQueryData(["user"], (prevData: User) => {
       return {
         ...prevData,
-        links: JSON.stringify(updatedLinks),
+        links: JSON.stringify(updatedItems),
       };
     });
   };
@@ -88,7 +137,7 @@ const LinkTreeView = () => {
         ))}
         <button
           className=" bg-cyan-400 p-2 text-lg w-full uppercase text-slate-600 rounded-lg font-bold hover:cursor-pointer hover:bg-cyan-500"
-          onClick={() => mutate(user)}
+          onClick={() => mutate(queryClient.getQueryData(["user"])!)}
         >
           Guardar Cambios
         </button>

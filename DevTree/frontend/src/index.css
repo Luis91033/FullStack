@@ -1,3 +1,12 @@
 /** @format */
 
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
+
+@theme {
+  --background-image-home: url("/bg.svg");
+}
+
+@utility bg-home-xl {
+  background-size: 50%;
+}
