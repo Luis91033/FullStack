@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Budget from "../models/Budget";
+import Expense from "../models/Expense";
 
 export class BudgetController {
   static getAll = async (req: Request, res: Response) => {
@@ -13,6 +14,7 @@ export class BudgetController {
       res.status(500).json({ error: "Database error" });
     }
   };
+
   static create = async (req: Request, res: Response) => {
     try {
       const budget = new Budget(req.body);
@@ -22,13 +24,19 @@ export class BudgetController {
       res.status(500).json({ error: "Database error" });
     }
   };
+
   static getById = async (req: Request, res: Response) => {
-    res.json(req.budget);
+    const budget = await Budget.findByPk(req.budget.id, {
+      include: [Expense],
+    });
+    res.json(budget);
   };
+
   static updateById = async (req: Request, res: Response) => {
     await req.budget.update(req.body);
     res.status(200).json("Actualizado correctamente");
   };
+
   static deleteById = async (req: Request, res: Response) => {
     await req.budget.destroy();
     res.json("Presupuesto eliminado correctamente");
